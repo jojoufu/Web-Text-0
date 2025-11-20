@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>淘宝商品详情页模拟</title>
+    <style>
+        /* --- 基础重置 --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif; }
+        body { background-color: #f5f5f5; padding-bottom: 60px; }
+        
+        /* --- 商品主图 --- */
+        .product-image {
+            width: 100%;
+            height: 375px;
+            background-color: #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #888;
+            font-size: 1.2rem;
+            position: relative;
+        }
+        .product-image img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* --- 商品信息卡片 --- */
+        .card {
+            background: #fff;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+        .price-row { display: flex; align-items: baseline; color: #ff5000; margin-bottom: 8px; }
+        .currency { font-size: 14px; font-weight: bold; }
+        .price { font-size: 24px; font-weight: bold; }
+        .title { font-size: 16px; font-weight: 600; line-height: 1.4; color: #333; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+        .tags { margin-top: 8px; display: flex; gap: 5px; }
+        .tag { background: #fff1eb; color: #ff5000; font-size: 10px; padding: 2px 4px; border-radius: 2px; }
+
+        /* --- 底部导航栏 --- */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 50px;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            border-top: 1px solid #eee;
+            z-index: 100;
+        }
+        .nav-icon { flex: 1; text-align: center; font-size: 10px; color: #666; }
+        .nav-icon span { display: block; font-size: 18px; margin-bottom: 2px; }
+        
+        /* 交互按钮 */
+        .btn-group { flex: 2; display: flex; gap: 5px; margin-left: 10px; }
+        .btn {
+            flex: 1;
+            height: 36px;
+            border-radius: 18px;
+            border: none;
+            color: #fff;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .btn-cart { background: linear-gradient(90deg, #ffcb00, #ff9402); }
+        .btn-buy { background: linear-gradient(90deg, #ff5934, #ff1e02); }
+
+        /* --- 纯CSS交互核心 (Checkbox Hack) --- */
+        /* 隐藏真实的checkbox */
+        #sku-toggle { display: none; }
+
+        /* SKU 弹窗层 */
+        .sku-modal {
+            position: fixed;
+            bottom: -100%; /* 默认隐藏在底部 */
+            left: 0;
+            width: 100%;
+            background: #fff;
+            z-index: 200;
+            border-radius: 12px 12px 0 0;
+            padding: 20px;
+            transition: bottom 0.3s ease-in-out;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        }
+        
+        /* 遮罩层 */
+        .overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 150;
+            display: none; /* 默认不显示 */
+        }
+
+        /* 当 checkbox 被选中时 (点击加入购物车) */
+        #sku-toggle:checked ~ .sku-modal { bottom: 0; }
+        #sku-toggle:checked ~ .overlay { display: block; }
+
+        /* 弹窗内容样式 */
+        .sku-header { display: flex; gap: 10px; margin-bottom: 20px; }
+        .sku-thumb { width: 80px; height: 80px; background: #eee; border-radius: 4px; margin-top: -40px; border: 2px solid #fff; }
+        .sku-info .sku-price { color: #ff5000; font-size: 18px; font-weight: bold; }
+        .sku-options h4 { font-size: 14px; color: #333; margin-bottom: 10px; }
+        .option-btn {
+            padding: 6px 15px;
+            border: 1px solid #ddd;
+            border-radius: 15px;
+            font-size: 12px;
+            margin-right: 10px;
+            background: #fff;
+            color: #333;
+        }
+        .option-btn.selected { border-color: #ff5000; color: #ff5000; background: #fff1eb; }
+
+        /* 关闭按钮 Hack - 利用 label 再次点击取消选中 */
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 20px;
+            color: #999;
+            cursor: pointer;
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <input type="checkbox" id="sku-toggle">
+
+    <label for="sku-toggle" class="overlay"></label>
+
+    <div class="product-image">
+        [商品主图区域 - 模拟]
+    </div>
+
+    <div class="card">
+        <div class="price-row">
+            <span class="currency">¥</span><span class="price">299.00</span>
+        </div>
+        <div class="title">2025新款智能降噪蓝牙耳机 超长续航 入耳式运动跑步专用</div>
+        <div class="tags">
+            <span class="tag">天猫榜单TOP1</span>
+            <span class="tag">包邮</span>
+        </div>
+    </div>
+
+    <label for="sku-toggle" class="card" style="display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:13px; color:#666;">选择 颜色分类 / 尺码</span>
+        <span style="color:#ccc;">></span>
+    </label>
+
+    <div class="bottom-nav">
+        <div class="nav-icon"><span>🏠</span>店铺</div>
+        <div class="nav-icon"><span>💬</span>客服</div>
+        <div class="btn-group">
+            <label for="sku-toggle" class="btn btn-cart" style="display:flex;align-items:center;justify-content:center;">加入购物车</label>
+            <button class="btn btn-buy">立即购买</button>
+        </div>
+    </div>
+
+    <div class="sku-modal">
+        <label for="sku-toggle" class="close-btn">×</label>
+        <div class="sku-header">
+            <div class="sku-thumb"></div> <div class="sku-info">
+                <div class="sku-price">¥299.00</div>
+                <div style="font-size:12px; color:#666;">已选：极夜黑</div>
+            </div>
+        </div>
+        <div class="sku-options">
+            <h4>颜色分类</h4>
+            <div>
+                <span class="option-btn selected">极夜黑</span>
+                <span class="option-btn">珍珠白</span>
+                <span class="option-btn">星空灰</span>
+            </div>
+        </div>
+        <div style="margin-top: 20px;">
+            <button class="btn btn-buy" style="width:100%;">确定</button>
+        </div>
+    </div>
+
+</body>
+</html>
